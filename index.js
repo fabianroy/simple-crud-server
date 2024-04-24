@@ -61,6 +61,3 @@ app.listen(port, () => {
     console.log('server is running');
 })
 
-// fabianroy
-// 01612588178FrL
-
