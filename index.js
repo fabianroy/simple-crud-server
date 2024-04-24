@@ -8,7 +8,7 @@ app.use(express.json());
 
 // mongodb
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = "mongodb+srv://fabianroy:01612588178FrL@cluster0.he28ix7.mongodb.net/?retryWrites=true&w=majority";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -34,6 +34,13 @@ async function run() {
             res.send(result);
         });
 
+        app.get('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {_id: new ObjectId (id)}
+            const user = await userCollection.findOne(query);
+            res.send(user);
+        })
+
         app.post('/users', async (req, res) => {
             const user = req.body;
             console.log('new user', user);
@@ -41,6 +48,32 @@ async function run() {
             const result = await userCollection.insertOne(user);
             res.send(result);
         });
+
+        app.put('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const user = req.body;
+            console.log('updated user', user);
+            const filter ={_id: new ObjectId(id)};
+            const options = {upsert: true};
+            const updatedUser = {
+                $set: {
+                    name: user.name,
+                    email: user.email
+                }
+            }
+
+            const result  = await userCollection.updateOne(filter, updatedUser, options);
+            res.send(result);
+        });
+
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log('delete', id);
+
+            const query = {_id: new ObjectId(id)};
+            const result = await userCollection.deleteOne(query);
+            res.send(result);
+        })
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
